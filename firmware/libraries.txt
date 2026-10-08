@@ -1,0 +1,7 @@
+# Бібліотеки для Wokwi. Файл має називатися саме libraries.txt і лежати
+# поряд зі sketch.ino — Wokwi встановлює їх автоматично.
+
+DHT sensor library
+Adafruit Unified Sensor
+PubSubClient
+ArduinoJson

@@ -1,0 +1,16 @@
+# Ваш набір даних особистий: не комітьте його (п. 9 методичних вказівок).
+*.parquet
+variant_*.json
+tuning*.json
+data.txt*
+mote_locs.txt
+
+# Локальні бази даних і середовища
+*.duckdb
+*.duckdb.wal
+*.sqlite
+*.db
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
