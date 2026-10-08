@@ -1,0 +1,80 @@
+# ===========================================================================
+#  Grafana для стадії 6 (дашборд).
+#
+#  Порядок роботи (усі команди — з кореня репозиторію):
+#
+#    1. Дані мають уже лежати у вашому сховищі (стадія 2). Якщо у вас
+#       InfluxDB або TimescaleDB — сервер має працювати:
+#           docker compose -f pipeline/docker-compose.yml up -d
+#    2. Завантажте у сховище маніфест і знахідки (для SQLite/DuckDB — ще й
+#       самі дані у файл iot.sqlite):
+#           python dashboard/grafana/prepare.py --manifest variant_NNN.json --data variant_NNN.parquet --findings findings.json
+#    3. Запустіть Grafana:
+#           docker compose -f dashboard/grafana/docker-compose.yml up -d
+#    4. Відкрийте http://localhost:3000 — дашборди видно без входу.
+#       Щоб редагувати: «Sign in», логін admin, пароль kursova2025.
+#
+#  Зупинка:            docker compose -f dashboard/grafana/docker-compose.yml stop
+#  Видалити контейнер: docker compose -f dashboard/grafana/docker-compose.yml down
+#  Журнал:             docker compose -f dashboard/grafana/docker-compose.yml logs -f
+#
+#  Перший запуск довший: Docker завантажує образ Grafana (~1,3 ГБ), а Grafana —
+#  розширення для SQLite. Потрібен інтернет. Далі запуск займає кілька секунд.
+#  Попередження «a network with name kursova_default exists but was not
+#  created for project» — нормальне: Grafana приєднується до мережі баз даних.
+# ===========================================================================
+
+# Фіксована назва проєкту: інакше Docker назве його за текою, з якої
+# ви запустили команду, і контейнерів може стати два.
+name: kursova-grafana
+
+services:
+  grafana:
+    image: grafana/grafana:13.2.3
+    container_name: kursova-grafana
+    restart: unless-stopped
+    ports:
+      # Лише для цього комп'ютера: пароль нижче простий і загальновідомий.
+      - "127.0.0.1:3000:3000"
+    environment:
+      # Перегляд без входу (роль Viewer); редагування — після входу як admin.
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: kursova2025
+      # Розширення для SQLite (і вбудовані для PostgreSQL та InfluxDB)
+      # готуються ДО запуску вебсервера. Інакше Grafana довантажує їх з
+      # інтернету вже після запуску, і першу хвилину панелі показують
+      # «Plugin not registered».
+      GF_PLUGINS_PREINSTALL_SYNC: frser-sqlite-datasource,grafana-postgresql-datasource,influxdb
+      # Не оновлювати розширення самочинно під час запуску (наприклад, на захисті).
+      GF_PLUGINS_PREINSTALL_AUTO_UPDATE: "false"
+      # Стартова сторінка з поясненням, який дашборд відкривати.
+      GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH: /var/lib/grafana/dashboards/start.json
+      # Світла тема і дати на осях як 08.09 (а не американське 09/08).
+      GF_USERS_DEFAULT_THEME: light
+      GF_DATE_FORMATS_INTERVAL_HOUR: "DD.MM HH:mm"
+      GF_DATE_FORMATS_INTERVAL_DAY: "DD.MM"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_ANALYTICS_CHECK_FOR_PLUGIN_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+    volumes:
+      # Налаштування джерел даних і готові дашборди з цієї теки.
+      - ./provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./dashboards:/var/lib/grafana/dashboards:ro
+      # Корінь репозиторію (лише читання): звідси Grafana бере iot.sqlite.
+      - ../..:/kursova:ro
+      # Власні дані Grafana (встановлене розширення, ваші зміни).
+      - grafana-data:/var/lib/grafana
+
+# Спільна мережа з InfluxDB і TimescaleDB з pipeline/docker-compose.yml:
+# так Grafana знаходить їх за іменами influxdb і timescaledb. Якщо ті
+# сервери не запущені, мережу буде створено тут — це нормально.
+networks:
+  default:
+    name: kursova_default
+
+volumes:
+  grafana-data:

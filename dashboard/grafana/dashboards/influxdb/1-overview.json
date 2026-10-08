@@ -1,0 +1,764 @@
+{
+  "uid": "influxdb-overview",
+  "title": "1 · Огляд мережі · InfluxDB",
+  "description": "Огляд стану всієї мережі давачів",
+  "tags": [
+    "kursova",
+    "kursova-influxdb"
+  ],
+  "timezone": "utc",
+  "editable": true,
+  "graphTooltip": 1,
+  "refresh": "",
+  "schemaVersion": 41,
+  "version": 1,
+  "time": {
+    "from": "2025-09-01T00:00:00.000Z",
+    "to": "2025-10-31T00:00:00.000Z"
+  },
+  "timepicker": {},
+  "fiscalYearStartMonth": 0,
+  "liveNow": false,
+  "links": [
+    {
+      "title": "Інші дашборди сховища",
+      "type": "dashboards",
+      "tags": [
+        "kursova-influxdb"
+      ],
+      "asDropdown": false,
+      "keepTime": true,
+      "includeVars": false,
+      "targetBlank": false,
+      "icon": "external link"
+    },
+    {
+      "title": "Початкова сторінка",
+      "type": "link",
+      "url": "/",
+      "icon": "dashboard",
+      "keepTime": true,
+      "tooltip": "Як користуватися дашбордами"
+    }
+  ],
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Час — UTC.** Період обирається вгорі праворуч (типово 01.09–31.10.2025; навчальний набір — 01.09–15.09). Карта «% від звичайного»: сірий — як зазвичай, червоний — повідомлень менше або немає, синій — більше. Наведіть курсор на клітинку, щоб побачити число. Порожні панелі — див. початкову сторінку (посилання вгорі)."
+      },
+      "id": 1
+    },
+    {
+      "type": "stat",
+      "title": "Записів",
+      "description": "Записів телеметрії за обраний період",
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "kursova-influxdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "kursova-influxdb"
+          },
+          "query": "from(bucket: \"iot\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._field == \"value\")\n  |> count()\n  |> group()\n  |> sum()\n  |> keep(columns: [\"_value\"])"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      },
+      "id": 2
+    },
+    {
+      "type": "stat",
+      "title": "Пристроїв у даних",
+      "description": "Різних device_id у телеметрії за обраний період",
+      "gridPos": {
+        "x": 4,
+        "y": 3,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "kursova-influxdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "kursova-influxdb"
+          },
+          "query": "import \"influxdata/influxdb/schema\"\nschema.tagValues(bucket: \"iot\", tag: \"device_id\", start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> count()\n  |> keep(columns: [\"_value\"])"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      },
+      "id": 3
+    },
+    {
+      "type": "stat",
+      "title": "У маніфесті",
+      "description": "Пристроїв у маніфесті (таблиця devices, її створює prepare.py)",
+      "gridPos": {
+        "x": 10,
+        "y": 3,
+        "w": 5,
+        "h": 4
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "kursova-influxdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "kursova-influxdb"
+          },
+          "query": "from(bucket: \"dashboard\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"devices\" and r._field == \"zone\")\n  |> group()\n  |> count()\n  |> keep(columns: [\"_value\"])"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      },
+      "id": 4
+    },
+    {
+      "type": "stat",
+      "title": "На зв'язку",
+      "description": "Скільки пристроїв надсилали дані в останню годину даних обраного періоду",
+      "gridPos": {
+        "x": 15,
+        "y": 3,
+        "w": 5,
+        "h": 4
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "kursova-influxdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "kursova-influxdb"
+          },
+          "query": "// пристрої, що надсилали дані в останню годину даних обраного періоду\nimport \"date\"\nlastTime = (from(bucket: \"iot\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._field == \"value\")\n  |> last()\n  |> group()\n  |> max(column: \"_time\")\n  |> findRecord(fn: (key) => true, idx: 0))._time\nfrom(bucket: \"iot\")\n  |> range(start: date.sub(d: 1h, from: lastTime), stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._field == \"value\")\n  |> group()\n  |> distinct(column: \"device_id\")\n  |> count()\n  |> keep(columns: [\"_value\"])"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      },
+      "id": 5
+    },
+    {
+      "type": "stat",
+      "title": "Знахідок",
+      "description": "Знахідок у findings.json (таблиця findings, її створює prepare.py)",
+      "gridPos": {
+        "x": 20,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "kursova-influxdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "kursova-influxdb"
+          },
+          "query": "import \"array\"\nfound = from(bucket: \"dashboard\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"findings\" and r._field == \"no\")\n  |> group()\n  |> count()\n  |> findRecord(fn: (key) => true, idx: 0)\narray.from(rows: [{\"Знахідок\": if exists found._value then found._value else 0}])"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      },
+      "id": 6
+    },
+    {
+      "type": "status-history",
+      "title": "Повідомлення, % від звичайного для пристрою",
+      "description": "Рядок — пристрій (і його зона), клітинка — інтервал часу: 1 год для коротких періодів, кілька годин для довгих (наведіть курсор). Звичайне = середня кількість повідомлень пристрою за такий інтервал в обраному періоді.",
+      "gridPos": {
+        "x": 0,
+        "y": 7,
+        "w": 24,
+        "h": 30
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "kursova-influxdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "kursova-influxdb"
+          },
+          "query": "// Повідомлень від кожного пристрою за кожен інтервал (v.windowPeriod: 1 год\n// для коротких періодів, кілька годин для довгих), у % від звичайної\n// (середньої) кількості для цього пристрою. Інтервал без жодного\n// повідомлення дає 0 % — він червоний.\nimport \"join\"\nimport \"math\"\ncounts = from(bucket: \"iot\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._field == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: count, createEmpty: true, timeSrc: \"_start\")\n  |> group(columns: [\"device_id\"])\n  |> aggregateWindow(every: v.windowPeriod, fn: sum, createEmpty: true, timeSrc: \"_start\")\n  |> fill(value: 0)\n  |> keep(columns: [\"_time\", \"_value\", \"device_id\"])\n  |> group(columns: [\"device_id\"])\nusual = counts\n  |> filter(fn: (r) => r._value > 0)\n  |> mean()\nzones = from(bucket: \"dashboard\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"devices\" and r._field == \"zone\")\n  |> group(columns: [\"device_id\"])\n  |> map(fn: (r) => ({device_id: r.device_id, zone: r._value}))\njoin.inner(left: counts, right: usual, on: (l, r) => l.device_id == r.device_id,\n    as: (l, r) => ({_time: l._time, device_id: l.device_id,\n                    _value: math.round(x: 100.0 * float(v: l._value) / r._value)}))\n  |> join.left(right: zones, on: (l, r) => l.device_id == r.device_id,\n    as: (l, r) => ({_time: l._time, _value: l._value, device_id: l.device_id,\n                    device: (if exists r.zone then r.zone else \"немає в маніфесті\")\n                            + \" · \" + l.device_id}))\n  |> group(columns: [\"device\"])\n  |> keep(columns: [\"_time\", \"_value\", \"device\"])"
+        }
+      ],
+      "interval": "1h",
+      "maxDataPoints": 200,
+      "transformations": [],
+      "options": {
+        "showValue": "never",
+        "rowHeight": 0.92,
+        "colWidth": 1,
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "displayName": "${__field.labels.device}",
+          "unit": "percent",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#a83232",
+                "value": null
+              },
+              {
+                "color": "#e8807c",
+                "value": 25
+              },
+              {
+                "color": "#e4e3de",
+                "value": 75
+              },
+              {
+                "color": "#6da7ec",
+                "value": 125
+              },
+              {
+                "color": "#184f95",
+                "value": 200
+              }
+            ]
+          },
+          "custom": {
+            "lineWidth": 0,
+            "fillOpacity": 100
+          }
+        },
+        "overrides": []
+      },
+      "id": 7
+    },
+    {
+      "type": "status-history",
+      "title": "Те саме за групами: $group_by",
+      "description": "Сума повідомлень пристроїв групи за інтервал, у % від звичайного для групи. Групу (зона чи шлюз) обирають угорі.",
+      "gridPos": {
+        "x": 0,
+        "y": 37,
+        "w": 24,
+        "h": 9
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "kursova-influxdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "kursova-influxdb"
+          },
+          "query": "// Те саме, але сумарно для кожної зони або шлюзу (змінна «Групувати за»).\n// Зону (шлюз) пристрою беремо з виміру devices: його рядок стоїть першим\n// серед рядків пристрою, і fill() копіює це значення на всі рядки нижче.\nimport \"internal/debug\"\nimport \"join\"\nimport \"math\"\ninfo = from(bucket: \"dashboard\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"devices\" and r._field == \"${group_by}\")\n  |> map(fn: (r) => ({_time: time(v: 0), device_id: r.device_id, grp: r._value,\n                      n: debug.null(type: \"int\")}))\ncounts = from(bucket: \"iot\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._field == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: count, createEmpty: true, timeSrc: \"_start\")\n  |> map(fn: (r) => ({_time: r._time, device_id: r.device_id, n: r._value,\n                      grp: debug.null(type: \"string\")}))\ngrouped = union(tables: [info, counts])\n  |> group(columns: [\"device_id\"])\n  |> sort(columns: [\"_time\"])\n  |> fill(column: \"grp\", usePrevious: true)\n  |> filter(fn: (r) => exists r.n)\n  |> map(fn: (r) => ({_time: r._time, _value: r.n,\n                      grp: if exists r.grp then r.grp else \"немає в маніфесті\"}))\n  |> group(columns: [\"grp\", \"_time\"])\n  |> sum()\n  |> group(columns: [\"grp\"])\nusual = grouped\n  |> filter(fn: (r) => r._value > 0)\n  |> mean()\njoin.inner(left: grouped, right: usual, on: (l, r) => l.grp == r.grp,\n  as: (l, r) => ({_time: l._time, grp: l.grp,\n                  _value: math.round(x: 100.0 * float(v: l._value) / r._value)}))"
+        }
+      ],
+      "interval": "1h",
+      "maxDataPoints": 200,
+      "transformations": [],
+      "options": {
+        "showValue": "never",
+        "rowHeight": 0.92,
+        "colWidth": 1,
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "displayName": "${__field.labels.grp}",
+          "unit": "percent",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#a83232",
+                "value": null
+              },
+              {
+                "color": "#e8807c",
+                "value": 25
+              },
+              {
+                "color": "#e4e3de",
+                "value": 75
+              },
+              {
+                "color": "#6da7ec",
+                "value": 125
+              },
+              {
+                "color": "#184f95",
+                "value": 200
+              }
+            ]
+          },
+          "custom": {
+            "lineWidth": 0,
+            "fillOpacity": 100
+          }
+        },
+        "overrides": []
+      },
+      "id": 8
+    },
+    {
+      "type": "table",
+      "title": "Зведення за групами: $group_by",
+      "description": "Доступність — частка годин, коли пристрої групи надсилали хоч щось.",
+      "gridPos": {
+        "x": 0,
+        "y": 46,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "influxdb",
+        "uid": "kursova-influxdb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "influxdb",
+            "uid": "kursova-influxdb"
+          },
+          "query": "// Доступність = частка годин, коли пристрої групи надсилали дані.\nimport \"join\"\ninfo = from(bucket: \"dashboard\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"devices\" and r._field == \"${group_by}\")\n  |> group(columns: [\"device_id\"])\n  |> map(fn: (r) => ({device_id: r.device_id, grp: r._value}))\ndata = from(bucket: \"iot\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._field == \"value\")\nhourly = data\n  |> aggregateWindow(every: 1h, fn: count, createEmpty: false, timeSrc: \"_start\")\n  |> group(columns: [\"device_id\"])\n  |> aggregateWindow(every: 1h, fn: sum, createEmpty: false, timeSrc: \"_start\")\nfirstHour = (hourly |> group() |> min(column: \"_time\") |> findRecord(fn: (key) => true, idx: 0))._time\nlastHour = (hourly |> group() |> max(column: \"_time\") |> findRecord(fn: (key) => true, idx: 0))._time\nspanHours = float(v: int(v: lastHour) - int(v: firstHour)) / 3600000000000.0 + 1.0\nperDevice = hourly\n  |> reduce(identity: {n: 0, hours: 0}, fn: (r, accumulator) =>\n       ({n: accumulator.n + r._value, hours: accumulator.hours + 1}))\n  |> map(fn: (r) => ({device_id: r.device_id, n: r.n, hours: r.hours}))\nlastSeen = data\n  |> last()\n  |> group(columns: [\"device_id\"])\n  |> max(column: \"_time\")\n  |> map(fn: (r) => ({device_id: r.device_id, last: r._time}))\nseen = join.inner(left: perDevice, right: lastSeen, on: (l, r) => l.device_id == r.device_id,\n  as: (l, r) => ({l with last: r.last}))\njoin.full(left: seen, right: info, on: (l, r) => l.device_id == r.device_id,\n  as: (l, r) => ({device_id: if exists l.device_id then l.device_id else r.device_id,\n                  grp: if exists r.grp then r.grp else \"немає в маніфесті\",\n                  listed: if exists r.grp then 1 else 0,\n                  observed: if exists l.n then 1 else 0,\n                  n: if exists l.n then l.n else 0,\n                  hours: if exists l.hours then l.hours else 0,\n                  last: if exists l.last then int(v: l.last) else 0}))\n  |> group(columns: [\"grp\"])\n  |> reduce(identity: {listed: 0, observed: 0, n: 0, hours: 0, devices: 0, last: 0},\n       fn: (r, accumulator) => ({listed: accumulator.listed + r.listed,\n                                 observed: accumulator.observed + r.observed,\n                                 n: accumulator.n + r.n, hours: accumulator.hours + r.hours,\n                                 devices: accumulator.devices + 1,\n                                 last: if r.last > accumulator.last then r.last else accumulator.last}))\n  |> group()\n  |> map(fn: (r) => ({\"Група\": r.grp, \"Пристроїв у маніфесті\": r.listed,\n                      \"Пристроїв у даних\": r.observed, \"Повідомлень\": r.n,\n                      \"Доступність, %\": float(v: r.hours) * 100.0 / (float(v: r.devices) * spanHours),\n                      \"Останнє повідомлення\": time(v: r.last)}))\n  |> sort(columns: [\"Група\"])"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "fields": ""
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Останнє повідомлення"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:DD.MM.YYYY HH:mm"
+              },
+              {
+                "id": "custom.width",
+                "value": 135
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Доступність, %"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [
+        {
+          "id": "organize",
+          "options": {
+            "indexByName": {
+              "Група": 0,
+              "Пристроїв у маніфесті": 1,
+              "Пристроїв у даних": 2,
+              "Повідомлень": 3,
+              "Доступність, %": 4,
+              "Останнє повідомлення": 5
+            },
+            "excludeByName": {},
+            "renameByName": {}
+          }
+        }
+      ],
+      "id": 9
+    },
+    {
+      "type": "row",
+      "title": "Усі пристрої (натисніть, щоб розгорнути)",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 56,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "type": "table",
+          "title": "Усі пристрої",
+          "description": "Клікніть назву пристрою, щоб відкрити його графіки.",
+          "gridPos": {
+            "x": 0,
+            "y": 57,
+            "w": 24,
+            "h": 16
+          },
+          "datasource": {
+            "type": "influxdb",
+            "uid": "kursova-influxdb"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "influxdb",
+                "uid": "kursova-influxdb"
+              },
+              "query": "import \"join\"\ndata = from(bucket: \"iot\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._field == \"value\")\ncounts = data |> count() |> group(columns: [\"device_id\"]) |> sum() |> group()\n  |> map(fn: (r) => ({device_id: r.device_id, n: r._value}))\nfirsts = data |> first() |> group(columns: [\"device_id\"]) |> min(column: \"_time\") |> group()\n  |> map(fn: (r) => ({device_id: r.device_id, first: r._time}))\nlasts = data |> last() |> group(columns: [\"device_id\"]) |> max(column: \"_time\") |> group()\n  |> map(fn: (r) => ({device_id: r.device_id, last: r._time}))\ninfo = from(bucket: \"dashboard\")\n  |> range(start: 0)\n  |> filter(fn: (r) => r._measurement == \"devices\")\n  |> pivot(rowKey: [\"_time\"], columnKey: [\"_field\"], valueColumn: \"_value\")\n  |> group()\n  |> map(fn: (r) => ({device_id: r.device_id, type: r.type, zone: r.zone, gateway: r.gateway}))\nseen = join.inner(left: counts, right: firsts, on: (l, r) => l.device_id == r.device_id,\n         as: (l, r) => ({l with first: r.first}))\n  |> join.inner(right: lasts, on: (l, r) => l.device_id == r.device_id,\n         as: (l, r) => ({l with last: r.last}))\njoin.full(left: seen, right: info, on: (l, r) => l.device_id == r.device_id,\n  as: (l, r) => ({\"Пристрій\": if exists l.device_id then l.device_id else r.device_id,\n                  \"Тип\": r.type, \"Зона\": if exists r.zone then r.zone else \"немає в маніфесті\",\n                  \"Шлюз\": r.gateway,\n                  \"У маніфесті\": if exists r.zone then \"так\" else \"ні\",\n                  \"Повідомлень\": if exists l.n then l.n else 0,\n                  \"Перше\": l.first, \"Останнє\": l.last}))\n  |> sort(columns: [\"Зона\", \"Пристрій\"])"
+            }
+          ],
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false,
+              "reducer": [
+                "sum"
+              ],
+              "fields": ""
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": true
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Перше"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:DD.MM.YYYY HH:mm"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 135
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Останнє"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:DD.MM.YYYY HH:mm"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 135
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Пристрій"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Графіки пристрою",
+                        "url": "/d/influxdb-device/?var-device=${__value.raw}&${__url_time_range}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "transformations": [
+            {
+              "id": "organize",
+              "options": {
+                "indexByName": {
+                  "Пристрій": 0,
+                  "Тип": 1,
+                  "Зона": 2,
+                  "Шлюз": 3,
+                  "У маніфесті": 4,
+                  "Повідомлень": 5,
+                  "Перше": 6,
+                  "Останнє": 7
+                },
+                "excludeByName": {},
+                "renameByName": {}
+              }
+            }
+          ],
+          "id": 11
+        }
+      ],
+      "id": 10
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "type": "custom",
+        "name": "group_by",
+        "label": "Групувати за",
+        "query": "Зони : zone, Шлюзи : gateway",
+        "current": {
+          "text": "Зони",
+          "value": "zone"
+        },
+        "options": [
+          {
+            "text": "Зони",
+            "value": "zone",
+            "selected": true
+          },
+          {
+            "text": "Шлюзи",
+            "value": "gateway",
+            "selected": false
+          }
+        ],
+        "multi": false,
+        "includeAll": false,
+        "hide": 0
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  }
+}

@@ -1,0 +1,783 @@
+{
+  "uid": "timescaledb-overview",
+  "title": "1 · Огляд мережі · TimescaleDB",
+  "description": "Огляд стану всієї мережі давачів",
+  "tags": [
+    "kursova",
+    "kursova-timescaledb"
+  ],
+  "timezone": "utc",
+  "editable": true,
+  "graphTooltip": 1,
+  "refresh": "",
+  "schemaVersion": 41,
+  "version": 1,
+  "time": {
+    "from": "2025-09-01T00:00:00.000Z",
+    "to": "2025-10-31T00:00:00.000Z"
+  },
+  "timepicker": {},
+  "fiscalYearStartMonth": 0,
+  "liveNow": false,
+  "links": [
+    {
+      "title": "Інші дашборди сховища",
+      "type": "dashboards",
+      "tags": [
+        "kursova-timescaledb"
+      ],
+      "asDropdown": false,
+      "keepTime": true,
+      "includeVars": false,
+      "targetBlank": false,
+      "icon": "external link"
+    },
+    {
+      "title": "Початкова сторінка",
+      "type": "link",
+      "url": "/",
+      "icon": "dashboard",
+      "keepTime": true,
+      "tooltip": "Як користуватися дашбордами"
+    }
+  ],
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 3
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "**Час — UTC.** Період обирається вгорі праворуч (типово 01.09–31.10.2025; навчальний набір — 01.09–15.09). Карта «% від звичайного»: сірий — як зазвичай, червоний — повідомлень менше або немає, синій — більше. Наведіть курсор на клітинку, щоб побачити число. Порожні панелі — див. початкову сторінку (посилання вгорі)."
+      },
+      "id": 1
+    },
+    {
+      "type": "stat",
+      "title": "Записів",
+      "description": "Записів телеметрії за обраний період",
+      "gridPos": {
+        "x": 0,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "kursova-timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "kursova-timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": "table",
+          "rawSql": "SELECT count(*) AS \"Записів\" FROM readings WHERE $__timeFilter(ts)"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "locale",
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      },
+      "id": 2
+    },
+    {
+      "type": "stat",
+      "title": "Пристроїв у даних",
+      "description": "Різних device_id у телеметрії за обраний період",
+      "gridPos": {
+        "x": 4,
+        "y": 3,
+        "w": 6,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "kursova-timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "kursova-timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": "table",
+          "rawSql": "SELECT count(DISTINCT device_id) AS \"Пристроїв\" FROM readings WHERE $__timeFilter(ts)"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      },
+      "id": 3
+    },
+    {
+      "type": "stat",
+      "title": "У маніфесті",
+      "description": "Пристроїв у маніфесті (таблиця devices, її створює prepare.py)",
+      "gridPos": {
+        "x": 10,
+        "y": 3,
+        "w": 5,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "kursova-timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "kursova-timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": "table",
+          "rawSql": "SELECT count(*) AS \"Пристроїв\" FROM devices"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      },
+      "id": 4
+    },
+    {
+      "type": "stat",
+      "title": "На зв'язку",
+      "description": "Скільки пристроїв надсилали дані в останню годину даних обраного періоду",
+      "gridPos": {
+        "x": 15,
+        "y": 3,
+        "w": 5,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "kursova-timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "kursova-timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": "table",
+          "rawSql": "-- пристрої, що надсилали дані в останню годину даних обраного періоду\nSELECT count(DISTINCT device_id) AS \"Пристроїв\" FROM readings\nWHERE ts < $__timeTo()\n  AND ts >= (SELECT max(ts) FROM readings WHERE $__timeFilter(ts)) - interval '1 hour'"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      },
+      "id": 5
+    },
+    {
+      "type": "stat",
+      "title": "Знахідок",
+      "description": "Знахідок у findings.json (таблиця findings, її створює prepare.py)",
+      "gridPos": {
+        "x": 20,
+        "y": 3,
+        "w": 4,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "kursova-timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "kursova-timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": "table",
+          "rawSql": "SELECT count(*) AS \"Знахідок\" FROM findings"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "auto",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      },
+      "id": 6
+    },
+    {
+      "type": "status-history",
+      "title": "Повідомлення, % від звичайного для пристрою",
+      "description": "Рядок — пристрій (і його зона), клітинка — інтервал часу: 1 год для коротких періодів, кілька годин для довгих (наведіть курсор). Звичайне = середня кількість повідомлень пристрою за такий інтервал в обраному періоді.",
+      "gridPos": {
+        "x": 0,
+        "y": 7,
+        "w": 24,
+        "h": 30
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "kursova-timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "kursova-timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": "table",
+          "rawSql": "-- Повідомлень від кожного пристрою за кожен інтервал ($__interval: 1 год для\n-- коротких періодів, кілька годин для довгих), у % від звичайної (середньої)\n-- кількості для цього пристрою. Інтервал без жодного повідомлення дає 0 % —\n-- він червоний.\nWITH cells AS (\n    SELECT generate_series(time_bucket('$__interval', $__timeFrom()::timestamptz),\n                           $__timeTo()::timestamptz - interval '1 second',\n                           '$__interval'::interval) AS t),\ncounts AS (\n    SELECT device_id, time_bucket('$__interval', ts) AS t, count(*) AS n\n    FROM readings WHERE $__timeFilter(ts)\n    GROUP BY 1, 2),\nusual AS (SELECT device_id, avg(n) AS n FROM counts GROUP BY 1)\nSELECT cells.t AS time,\n       coalesce(d.zone, 'немає в маніфесті') || ' · ' || usual.device_id AS device,\n       round(100.0 * coalesce(counts.n, 0) / usual.n) AS pct\nFROM cells CROSS JOIN usual\nLEFT JOIN counts ON counts.device_id = usual.device_id AND counts.t = cells.t\nLEFT JOIN devices d ON d.device_id = usual.device_id\nORDER BY 1, d.zone NULLS LAST, usual.device_id"
+        }
+      ],
+      "interval": "1h",
+      "maxDataPoints": 200,
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "device"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": true
+            }
+          }
+        }
+      ],
+      "options": {
+        "showValue": "never",
+        "rowHeight": 0.92,
+        "colWidth": 1,
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "displayName": "${__field.labels.device}",
+          "unit": "percent",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#a83232",
+                "value": null
+              },
+              {
+                "color": "#e8807c",
+                "value": 25
+              },
+              {
+                "color": "#e4e3de",
+                "value": 75
+              },
+              {
+                "color": "#6da7ec",
+                "value": 125
+              },
+              {
+                "color": "#184f95",
+                "value": 200
+              }
+            ]
+          },
+          "custom": {
+            "lineWidth": 0,
+            "fillOpacity": 100
+          }
+        },
+        "overrides": []
+      },
+      "id": 7
+    },
+    {
+      "type": "status-history",
+      "title": "Те саме за групами: $group_by",
+      "description": "Сума повідомлень пристроїв групи за інтервал, у % від звичайного для групи. Групу (зона чи шлюз) обирають угорі.",
+      "gridPos": {
+        "x": 0,
+        "y": 37,
+        "w": 24,
+        "h": 9
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "kursova-timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "kursova-timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": "table",
+          "rawSql": "-- Те саме, але сумарно для кожної зони або шлюзу (змінна «Групувати за»).\nWITH cells AS (\n    SELECT generate_series(time_bucket('$__interval', $__timeFrom()::timestamptz),\n                           $__timeTo()::timestamptz - interval '1 second',\n                           '$__interval'::interval) AS t),\nper_device AS (\n    SELECT device_id, time_bucket('$__interval', ts) AS t, count(*) AS n\n    FROM readings WHERE $__timeFilter(ts)\n    GROUP BY 1, 2),\ncounts AS (\n    SELECT coalesce(d.$group_by, 'немає в маніфесті') AS grp, p.t, sum(p.n) AS n\n    FROM per_device p LEFT JOIN devices d ON d.device_id = p.device_id\n    GROUP BY 1, 2),\nusual AS (SELECT grp, avg(n) AS n FROM counts GROUP BY grp)\nSELECT cells.t AS time, usual.grp AS grp,\n       round(100.0 * coalesce(counts.n, 0) / usual.n) AS pct\nFROM cells CROSS JOIN usual\nLEFT JOIN counts ON counts.grp = usual.grp AND counts.t = cells.t\nORDER BY 1, 2"
+        }
+      ],
+      "interval": "1h",
+      "maxDataPoints": 200,
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "grp"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": true
+            }
+          }
+        }
+      ],
+      "options": {
+        "showValue": "never",
+        "rowHeight": 0.92,
+        "colWidth": 1,
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "displayName": "${__field.labels.grp}",
+          "unit": "percent",
+          "decimals": 0,
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "#a83232",
+                "value": null
+              },
+              {
+                "color": "#e8807c",
+                "value": 25
+              },
+              {
+                "color": "#e4e3de",
+                "value": 75
+              },
+              {
+                "color": "#6da7ec",
+                "value": 125
+              },
+              {
+                "color": "#184f95",
+                "value": 200
+              }
+            ]
+          },
+          "custom": {
+            "lineWidth": 0,
+            "fillOpacity": 100
+          }
+        },
+        "overrides": []
+      },
+      "id": 8
+    },
+    {
+      "type": "table",
+      "title": "Зведення за групами: $group_by",
+      "description": "Доступність — частка годин, коли пристрої групи надсилали хоч щось.",
+      "gridPos": {
+        "x": 0,
+        "y": 46,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "kursova-timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "kursova-timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": "table",
+          "rawSql": "-- Доступність = частка годин, коли пристрої групи надсилали дані.\nWITH counts AS (\n    SELECT device_id, time_bucket(interval '1 hour', ts) AS hour, count(*) AS n,\n           max(ts) AS last_ts\n    FROM readings WHERE $__timeFilter(ts)\n    GROUP BY 1, 2),\nspan AS (SELECT extract(epoch FROM max(hour) - min(hour)) / 3600 + 1 AS hours FROM counts),\nper_device AS (\n    SELECT device_id, count(*) AS hours, sum(n) AS n, max(last_ts) AS last_ts\n    FROM counts GROUP BY device_id),\neveryone AS (SELECT device_id FROM devices UNION SELECT device_id FROM per_device)\nSELECT coalesce(d.$group_by, 'немає в маніфесті') AS \"Група\",\n       count(d.device_id) AS \"Пристроїв у маніфесті\",\n       count(p.device_id) AS \"Пристроїв у даних\",\n       coalesce(sum(p.n), 0) AS \"Повідомлень\",\n       round((100.0 * coalesce(sum(p.hours), 0) / (count(*) * (SELECT hours FROM span)))::numeric, 1)\n           AS \"Доступність, %\",\n       max(p.last_ts) AS \"Останнє повідомлення\"\nFROM everyone e\nLEFT JOIN devices d ON d.device_id = e.device_id\nLEFT JOIN per_device p ON p.device_id = e.device_id\nGROUP BY 1 ORDER BY 1"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "fields": ""
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Останнє повідомлення"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:DD.MM.YYYY HH:mm"
+              },
+              {
+                "id": "custom.width",
+                "value": 135
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Доступність, %"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [],
+      "id": 9
+    },
+    {
+      "type": "row",
+      "title": "Усі пристрої (натисніть, щоб розгорнути)",
+      "collapsed": true,
+      "gridPos": {
+        "x": 0,
+        "y": 56,
+        "w": 24,
+        "h": 1
+      },
+      "panels": [
+        {
+          "type": "table",
+          "title": "Усі пристрої",
+          "description": "Клікніть назву пристрою, щоб відкрити його графіки.",
+          "gridPos": {
+            "x": 0,
+            "y": 57,
+            "w": 24,
+            "h": 16
+          },
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "kursova-timescaledb"
+          },
+          "targets": [
+            {
+              "refId": "A",
+              "datasource": {
+                "type": "grafana-postgresql-datasource",
+                "uid": "kursova-timescaledb"
+              },
+              "editorMode": "code",
+              "rawQuery": true,
+              "format": "table",
+              "rawSql": "WITH per_device AS (\n    SELECT device_id, count(*) AS n, min(ts) AS first_ts, max(ts) AS last_ts\n    FROM readings WHERE $__timeFilter(ts)\n    GROUP BY device_id),\neveryone AS (SELECT device_id FROM devices UNION SELECT device_id FROM per_device)\nSELECT e.device_id AS \"Пристрій\", d.type AS \"Тип\",\n       coalesce(d.zone, 'немає в маніфесті') AS \"Зона\", d.gateway AS \"Шлюз\",\n       CASE WHEN d.device_id IS NULL THEN 'ні' ELSE 'так' END AS \"У маніфесті\",\n       coalesce(p.n, 0) AS \"Повідомлень\", p.first_ts AS \"Перше\", p.last_ts AS \"Останнє\"\nFROM everyone e\nLEFT JOIN devices d ON d.device_id = e.device_id\nLEFT JOIN per_device p ON p.device_id = e.device_id\nORDER BY d.zone NULLS LAST, e.device_id"
+            }
+          ],
+          "options": {
+            "showHeader": true,
+            "cellHeight": "sm",
+            "footer": {
+              "show": false,
+              "reducer": [
+                "sum"
+              ],
+              "fields": ""
+            }
+          },
+          "fieldConfig": {
+            "defaults": {
+              "custom": {
+                "align": "auto",
+                "cellOptions": {
+                  "type": "auto"
+                },
+                "inspect": true
+              }
+            },
+            "overrides": [
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Перше"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:DD.MM.YYYY HH:mm"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 135
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Останнє"
+                },
+                "properties": [
+                  {
+                    "id": "unit",
+                    "value": "time:DD.MM.YYYY HH:mm"
+                  },
+                  {
+                    "id": "custom.width",
+                    "value": 135
+                  }
+                ]
+              },
+              {
+                "matcher": {
+                  "id": "byName",
+                  "options": "Пристрій"
+                },
+                "properties": [
+                  {
+                    "id": "links",
+                    "value": [
+                      {
+                        "title": "Графіки пристрою",
+                        "url": "/d/timescaledb-device/?var-device=${__value.raw}&${__url_time_range}"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          },
+          "transformations": [],
+          "id": 11
+        }
+      ],
+      "id": 10
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "type": "custom",
+        "name": "group_by",
+        "label": "Групувати за",
+        "query": "Зони : zone, Шлюзи : gateway",
+        "current": {
+          "text": "Зони",
+          "value": "zone"
+        },
+        "options": [
+          {
+            "text": "Зони",
+            "value": "zone",
+            "selected": true
+          },
+          {
+            "text": "Шлюзи",
+            "value": "gateway",
+            "selected": false
+          }
+        ],
+        "multi": false,
+        "includeAll": false,
+        "hide": 0
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  }
+}

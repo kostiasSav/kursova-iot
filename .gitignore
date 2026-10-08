@@ -5,6 +5,10 @@ tuning*.json
 data.txt*
 mote_locs.txt
 
+# Записи трафіку: у записі «до» (порт 1883) видно ваш пароль від брокера
+*.pcap
+*.pcapng
+
 # Локальні бази даних і середовища
 *.duckdb
 *.duckdb.wal

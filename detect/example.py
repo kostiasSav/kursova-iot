@@ -82,7 +82,7 @@ class Dataset:
         dev_names = dev_arr.dictionary.to_pylist()
         met_names = met_arr.dictionary.to_pylist()
 
-        self.manifest = json.loads(manifest.read_text())
+        self.manifest = json.loads(manifest.read_text(encoding="utf-8"))
         self.info = {d["device_id"]: d for d in self.manifest["devices"]}
         self.observed = sorted({dev_names[c] for c in np.unique(dev_code)})
 
@@ -267,19 +267,19 @@ def main() -> None:
     args = ap.parse_args()
 
     ds = Dataset(Path(args.data), Path(args.manifest))
-    print(f"завантажено {ds.rows:,} записів, {len(ds.observed)} пристроїв\n"
-          .replace(",", " "))
+    print(f"завантажено записів: {ds.rows:,}".replace(",", " ")
+          + f"; пристроїв: {len(ds.observed)}\n")
 
     findings = []
     for name, fn, cls in (("stuck_at", detect_stuck_at, "stuck_at"),
                           ("spike_storm", detect_spike_storm, "spike_storm")):
         got = fn(ds)
         findings += got
-        print(f"детектор {name}: {len(got)} кандидатів")
+        print(f"детектор {name}: кандидатів — {len(got)}")
 
     truth_path = Path(args.truth)
     if truth_path.exists():
-        truth = json.loads(truth_path.read_text())
+        truth = json.loads(truth_path.read_text(encoding="utf-8"))
         print("\nЯкість на навчальному наборі (лише реалізовані класи):")
         evaluate(findings, truth, only={"stuck_at", "spike_storm"})
         print("\nУсі 12 класів:")
@@ -291,7 +291,7 @@ def main() -> None:
     if args.out:
         Path(args.out).write_text(json.dumps(
             {"variant": ds.manifest["variant"], "findings": findings},
-            indent=2, ensure_ascii=False))
+            indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"\nзаписано {args.out}")
 
     print("\nДалі: решта десять класів із розділу 7 методичних вказівок,"

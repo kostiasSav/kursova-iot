@@ -1,0 +1,39 @@
+{
+  "uid": "kursova-start",
+  "title": "Курсовий проєкт: з чого почати",
+  "tags": [
+    "kursova"
+  ],
+  "timezone": "utc",
+  "editable": true,
+  "schemaVersion": 41,
+  "version": 1,
+  "time": {
+    "from": "2025-09-01T00:00:00.000Z",
+    "to": "2025-10-31T00:00:00.000Z"
+  },
+  "panels": [
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 24
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "# Курсовий проєкт: дашборди Grafana\n\nВідкрийте дашборди **свого** сховища (поле `assigned_stack.storage` у маніфесті).\nДашборди двох інших сховищ показуватимуть помилки — це нормально.\n\n| Ваше сховище | 1 · Огляд мережі | 2 · Пристрій | 3 · Аномалії |\n|---|---|---|---|\n| SQLite або DuckDB | [відкрити](/d/sqlite-overview) | [відкрити](/d/sqlite-device) | [відкрити](/d/sqlite-anomalies) |\n| InfluxDB | [відкрити](/d/influxdb-overview) | [відкрити](/d/influxdb-device) | [відкрити](/d/influxdb-anomalies) |\n| TimescaleDB | [відкрити](/d/timescaledb-overview) | [відкрити](/d/timescaledb-device) | [відкрити](/d/timescaledb-anomalies) |\n\n**Період.** Типово показано 01.09–31.10.2025 — 60 діб вашого варіанта. Навчальний набір\n(`tuning.parquet`) охоплює лише 14 діб: для нього оберіть угорі праворуч\n2025-09-01 00:00:00 – 2025-09-15 00:00:00 або відкрийте огляд одразу з цим періодом:\n[SQLite](/d/sqlite-overview?from=1756684800000&to=1757894400000) ·\n[InfluxDB](/d/influxdb-overview?from=1756684800000&to=1757894400000) ·\n[TimescaleDB](/d/timescaledb-overview?from=1756684800000&to=1757894400000).\nУвесь час на дашбордах — **UTC**.\n\n**Перед першим запуском** завантажте у сховище маніфест і знахідки (з кореня репозиторію):\n\n    python dashboard/grafana/prepare.py --manifest variant_NNN.json --data variant_NNN.parquet --findings findings.json\n\nЗмінили `findings.json` — запустіть цю команду ще раз і оновіть сторінку.\n\n**Якщо панель порожня або червона** (наведіть курсор на червоний трикутник у кутку панелі):\n* `no such table: devices` або `relation \"devices\" does not exist` — не запущено `prepare.py`;\n* `dial tcp: lookup influxdb … no such host` (InfluxDB) або `failed to connect to server`\n  (TimescaleDB) — не запущено сервер бази: `docker compose -f pipeline/docker-compose.yml up -d`;\n* `unable to open database file: out of memory (14)` — це не про пам'ять: у корені\n  репозиторію немає файла `iot.sqlite` (його створює `prepare.py` для SQLite і DuckDB);\n* «No data» — період не збігається з датами ваших даних (див. «Період» вище).\n\nЩоб змінювати дашборди, увійдіть: **Sign in**, логін `admin`, пароль `kursova2025`.\nЗбережені зміни живуть у Grafana; щоб перенести їх у репозиторій, скористайтеся\n**Export → Export as JSON** і замініть файл у `dashboard/grafana/dashboards/`.\n"
+      },
+      "id": 1
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": []
+  },
+  "links": []
+}

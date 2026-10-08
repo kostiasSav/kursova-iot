@@ -1,0 +1,43 @@
+# Три джерела даних — по одному на кожне сховище курсу. Працює лише те,
+# яке відповідає вашому сховищу; помилки інших двох можна не зважати.
+# Логіни й паролі ті самі, що в pipeline/docker-compose.yml.
+apiVersion: 1
+
+datasources:
+  # SQLite (і DuckDB: дані переносяться у SQLite скриптом prepare.py).
+  # Файл iot.sqlite лежить у корені репозиторію, змонтованому як /kursova.
+  - name: SQLite
+    uid: kursova-sqlite
+    type: frser-sqlite-datasource
+    access: proxy
+    isDefault: true
+    jsonData:
+      path: /kursova/iot.sqlite
+
+  # InfluxDB 2.x, мова запитів Flux.
+  - name: InfluxDB
+    uid: kursova-influxdb
+    type: influxdb
+    access: proxy
+    url: http://influxdb:8086
+    jsonData:
+      version: Flux
+      organization: kursova
+      defaultBucket: iot
+    secureJsonData:
+      token: kursova-dev-token
+
+  # TimescaleDB = PostgreSQL з розширенням для часових рядів.
+  - name: TimescaleDB
+    uid: kursova-timescaledb
+    type: grafana-postgresql-datasource
+    access: proxy
+    url: timescaledb:5432
+    user: student
+    jsonData:
+      database: iot
+      sslmode: disable
+      timescaledb: true
+      postgresVersion: 1600
+    secureJsonData:
+      password: kursova2025
