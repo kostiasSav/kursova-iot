@@ -749,7 +749,7 @@ class InfluxDBStorage(Storage):
         super().__init__(progress=progress)
         client_mod = _import_driver(
             "influxdb_client", "influxdb-client",
-            note="І не забудьте підняти сервер:  docker compose up -d influxdb")
+            note="І не забудьте підняти сервер:  docker compose -f pipeline/docker-compose.yml up -d")
         self._api = _import_driver("influxdb_client.client.write_api", "influxdb-client")
         self._bucket, self._org = bucket, org
         self._url = url
@@ -933,8 +933,8 @@ class InfluxDBStorage(Storage):
         tail = f"\nЗапит Flux: {' '.join(flux.split())}" if flux else ""
         return (f"Не вдалося звернутися до InfluxDB за адресою {self._url}.\n"
                 f"Перевірте, що сервер запущено:\n"
-                f"    docker compose up -d influxdb\n"
-                f"    docker compose ps\n"
+                f"    docker compose -f pipeline/docker-compose.yml up -d\n"
+                f"    docker compose -f pipeline/docker-compose.yml ps\n"
                 f"і що токен/організація/bucket збігаються з docker-compose.yml.\n"
                 f"Деталі: {exc}{tail}")
 
@@ -981,8 +981,8 @@ class TimescaleDBStorage(Storage):
                  chunk_interval_days: int = 7, progress: bool = True) -> None:
         super().__init__(progress=progress)
         self._psycopg = _import_driver(
-            "psycopg", "'psycopg[binary]'",
-            note="І не забудьте підняти сервер:  docker compose up -d timescaledb")
+            "psycopg", '"psycopg[binary]"',
+            note="І не забудьте підняти сервер:  docker compose -f pipeline/docker-compose.yml up -d")
         self._dsn = dsn or (f"host={host} port={port} user={user} "
                             f"password={password} dbname={dbname}")
         self._where = dsn or f"{host}:{port}/{dbname}"
@@ -1160,8 +1160,8 @@ class TimescaleDBStorage(Storage):
     def _conn_hint(self, exc: Exception) -> str:
         return (f"Не вдалося підʼєднатися до TimescaleDB ({self._where}).\n"
                 f"Перевірте, що сервер запущено:\n"
-                f"    docker compose up -d timescaledb\n"
-                f"    docker compose ps\n"
+                f"    docker compose -f pipeline/docker-compose.yml up -d\n"
+                f"    docker compose -f pipeline/docker-compose.yml ps\n"
                 f"і що логін/пароль/база збігаються з docker-compose.yml.\n"
                 f"Деталі: {exc}")
 
@@ -1245,8 +1245,16 @@ def open_storage(kind: str, **kw: Any) -> Storage:
 # ==========================================================================
 
 def _peak_rss_mb() -> float:
-    """Peak resident set size of this process, in MB."""
-    import resource
+    """Peak memory of this process, in MB (NaN if it can't be measured)."""
+    try:
+        import resource                       # POSIX only
+    except ImportError:                       # Windows: psutil's peak working set
+        try:
+            import psutil
+        except ImportError:
+            return float("nan")
+        mem = psutil.Process().memory_info()
+        return getattr(mem, "peak_wset", mem.rss) / 1e6
     peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
     # macOS reports bytes, Linux reports kibibytes.
     return peak / 1e6 if sys.platform == "darwin" else peak / 1e3

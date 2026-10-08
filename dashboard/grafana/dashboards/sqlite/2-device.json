@@ -1,0 +1,493 @@
+{
+  "uid": "sqlite-device",
+  "title": "2 · Пристрій · SQLite",
+  "description": "Показники одного пристрою і вікна знахідок",
+  "tags": [
+    "kursova",
+    "kursova-sqlite"
+  ],
+  "timezone": "utc",
+  "editable": true,
+  "graphTooltip": 1,
+  "refresh": "",
+  "schemaVersion": 41,
+  "version": 1,
+  "time": {
+    "from": "2025-09-01T00:00:00.000Z",
+    "to": "2025-10-31T00:00:00.000Z"
+  },
+  "timepicker": {},
+  "fiscalYearStartMonth": 0,
+  "liveNow": false,
+  "links": [
+    {
+      "title": "Інші дашборди сховища",
+      "type": "dashboards",
+      "tags": [
+        "kursova-sqlite"
+      ],
+      "asDropdown": false,
+      "keepTime": true,
+      "includeVars": false,
+      "targetBlank": false,
+      "icon": "external link"
+    },
+    {
+      "title": "Початкова сторінка",
+      "type": "link",
+      "url": "/",
+      "icon": "dashboard",
+      "keepTime": true,
+      "tooltip": "Як користуватися дашбордами"
+    }
+  ],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Паспорт пристрою",
+      "description": "Тип, зона, шлюз і номінальний інтервал з маніфесту",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 7,
+        "h": 6
+      },
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "kursova-sqlite"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "kursova-sqlite"
+          },
+          "queryType": "table",
+          "rawQueryText": "SELECT type AS \"Тип\", zone AS \"Зона\", gateway AS \"Шлюз\",\n       interval_s AS \"Інтервал за маніфестом, с\"\nFROM devices WHERE device_id = '$device'",
+          "queryText": "SELECT type AS \"Тип\", zone AS \"Зона\", gateway AS \"Шлюз\",\n       interval_s AS \"Інтервал за маніфестом, с\"\nFROM devices WHERE device_id = '$device'",
+          "timeColumns": []
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/.*/",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true,
+        "text": {
+          "titleSize": 13,
+          "valueSize": 26
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": null,
+          "noValue": "немає в маніфесті",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      },
+      "transformations": [],
+      "id": 1
+    },
+    {
+      "type": "table",
+      "title": "Показники пристрою за весь час",
+      "description": "",
+      "gridPos": {
+        "x": 7,
+        "y": 0,
+        "w": 17,
+        "h": 6
+      },
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "kursova-sqlite"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "kursova-sqlite"
+          },
+          "queryType": "table",
+          "rawQueryText": "-- За весь час, незалежно від обраного періоду.\nSELECT r.metric AS \"Показник\", coalesce(u.unit, '') AS \"Одиниця\", count(*) AS \"Записів\",\n       min(r.ts) AS \"Перший\", max(r.ts) AS \"Останній\",\n       round((max(r.ts) - min(r.ts)) * 1.0 / max(count(*) - 1, 1), 1) AS \"Середній інтервал, с\"\nFROM readings r LEFT JOIN units u ON u.metric = r.metric\nWHERE r.device_id = '$device'\nGROUP BY r.metric, u.unit ORDER BY r.metric",
+          "queryText": "-- За весь час, незалежно від обраного періоду.\nSELECT r.metric AS \"Показник\", coalesce(u.unit, '') AS \"Одиниця\", count(*) AS \"Записів\",\n       min(r.ts) AS \"Перший\", max(r.ts) AS \"Останній\",\n       round((max(r.ts) - min(r.ts)) * 1.0 / max(count(*) - 1, 1), 1) AS \"Середній інтервал, с\"\nFROM readings r LEFT JOIN units u ON u.metric = r.metric\nWHERE r.device_id = '$device'\nGROUP BY r.metric, u.unit ORDER BY r.metric",
+          "timeColumns": [
+            "Перший",
+            "Останній"
+          ]
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "fields": ""
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Перший"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:DD.MM.YYYY HH:mm"
+              },
+              {
+                "id": "custom.width",
+                "value": 135
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Останній"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:DD.MM.YYYY HH:mm"
+              },
+              {
+                "id": "custom.width",
+                "value": 135
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Записів"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 90
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Одиниця"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 80
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Середній інтервал, с"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 1
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [],
+      "id": 2
+    },
+    {
+      "type": "timeseries",
+      "title": "$metric",
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 24,
+        "h": 8
+      },
+      "datasource": {
+        "type": "frser-sqlite-datasource",
+        "uid": "kursova-sqlite"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "kursova-sqlite"
+          },
+          "queryType": "table",
+          "rawQueryText": "-- Середнє, мінімум і максимум за кожен інтервал графіка ($__interval).\nSELECT ts / max(1, $__interval_ms / 1000) * max(1, $__interval_ms / 1000) AS time,\n       avg(value) AS \"середнє\", min(value) AS \"мінімум\", max(value) AS \"максимум\"\nFROM readings\nWHERE device_id = '$device' AND metric = '$metric'\n  AND ts >= $__from / 1000 AND ts < $__to / 1000\nGROUP BY 1 ORDER BY 1",
+          "queryText": "-- Середнє, мінімум і максимум за кожен інтервал графіка ($__interval).\nSELECT ts / max(1, $__interval_ms / 1000) * max(1, $__interval_ms / 1000) AS time,\n       avg(value) AS \"середнє\", min(value) AS \"мінімум\", max(value) AS \"максимум\"\nFROM readings\nWHERE device_id = '$device' AND metric = '$metric'\n  AND ts >= $__from / 1000 AND ts < $__to / 1000\nGROUP BY 1 ORDER BY 1",
+          "timeColumns": [
+            "time"
+          ]
+        }
+      ],
+      "repeat": "metric",
+      "repeatDirection": "v",
+      "maxDataPoints": 1500,
+      "description": "Лінія — середнє за інтервал, сіра смуга — від мінімуму до максимуму. Кольорові ділянки — знахідки з findings.json для цього пристрою.",
+      "options": {
+        "legend": {
+          "showLegend": true,
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "#52514e"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 0,
+            "showPoints": "never",
+            "spanNulls": false,
+            "axisSoftMin": null,
+            "drawStyle": "line",
+            "lineInterpolation": "linear"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "максимум"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "custom.fillBelowTo",
+                "value": "мінімум"
+              },
+              {
+                "id": "custom.fillOpacity",
+                "value": 22
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#52514e"
+                }
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "мінімум"
+            },
+            "properties": [
+              {
+                "id": "custom.lineWidth",
+                "value": 0
+              },
+              {
+                "id": "color",
+                "value": {
+                  "mode": "fixed",
+                  "fixedColor": "#52514e"
+                }
+              },
+              {
+                "id": "custom.hideFrom",
+                "value": {
+                  "legend": true,
+                  "tooltip": false,
+                  "viz": false
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "id": 3
+    }
+  ],
+  "templating": {
+    "list": [
+      {
+        "type": "query",
+        "name": "device",
+        "label": "Пристрій",
+        "datasource": {
+          "type": "frser-sqlite-datasource",
+          "uid": "kursova-sqlite"
+        },
+        "query": "SELECT m.device_id AS __value,\n       m.device_id || ' · ' || coalesce(d.zone || ' · ' || d.gateway, 'немає в маніфесті') AS __text\nFROM meta_device m LEFT JOIN devices d ON d.device_id = m.device_id\nORDER BY d.zone IS NULL, d.zone, m.device_id",
+        "definition": "SELECT m.device_id AS __value,\n       m.device_id || ' · ' || coalesce(d.zone || ' · ' || d.gateway, 'немає в маніфесті') AS __text\nFROM meta_device m LEFT JOIN devices d ON d.device_id = m.device_id\nORDER BY d.zone IS NULL, d.zone, m.device_id",
+        "refresh": 1,
+        "sort": 0,
+        "multi": false,
+        "includeAll": false,
+        "hide": 0,
+        "current": {},
+        "options": []
+      },
+      {
+        "type": "query",
+        "name": "metric",
+        "label": "Показник",
+        "datasource": {
+          "type": "frser-sqlite-datasource",
+          "uid": "kursova-sqlite"
+        },
+        "query": "SELECT DISTINCT metric FROM readings WHERE device_id = '$device' ORDER BY 1",
+        "definition": "SELECT DISTINCT metric FROM readings WHERE device_id = '$device' ORDER BY 1",
+        "refresh": 1,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "hide": 2,
+        "current": {
+          "text": [
+            "All"
+          ],
+          "value": [
+            "$__all"
+          ]
+        },
+        "options": []
+      }
+    ]
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      },
+      {
+        "name": "Знахідки: прості класи",
+        "enable": true,
+        "hide": false,
+        "iconColor": "#2a78d6",
+        "datasource": {
+          "type": "frser-sqlite-datasource",
+          "uid": "kursova-sqlite"
+        },
+        "target": {
+          "refId": "Anno",
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "kursova-sqlite"
+          },
+          "queryType": "table",
+          "rawQueryText": "SELECT start_ts AS time, end_ts AS timeend, label || ': ' || evidence AS text,\n       class AS tags\nFROM findings\nWHERE ',' || devices || ',' LIKE '%,$device,%' AND complexity = 'прості'",
+          "queryText": "SELECT start_ts AS time, end_ts AS timeend, label || ': ' || evidence AS text,\n       class AS tags\nFROM findings\nWHERE ',' || devices || ',' LIKE '%,$device,%' AND complexity = 'прості'",
+          "timeColumns": [
+            "time",
+            "timeend"
+          ]
+        }
+      },
+      {
+        "name": "Знахідки: середні класи",
+        "enable": true,
+        "hide": false,
+        "iconColor": "#eb6834",
+        "datasource": {
+          "type": "frser-sqlite-datasource",
+          "uid": "kursova-sqlite"
+        },
+        "target": {
+          "refId": "Anno",
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "kursova-sqlite"
+          },
+          "queryType": "table",
+          "rawQueryText": "SELECT start_ts AS time, end_ts AS timeend, label || ': ' || evidence AS text,\n       class AS tags\nFROM findings\nWHERE ',' || devices || ',' LIKE '%,$device,%' AND complexity = 'середні'",
+          "queryText": "SELECT start_ts AS time, end_ts AS timeend, label || ': ' || evidence AS text,\n       class AS tags\nFROM findings\nWHERE ',' || devices || ',' LIKE '%,$device,%' AND complexity = 'середні'",
+          "timeColumns": [
+            "time",
+            "timeend"
+          ]
+        }
+      },
+      {
+        "name": "Знахідки: складні класи",
+        "enable": true,
+        "hide": false,
+        "iconColor": "#1baf7a",
+        "datasource": {
+          "type": "frser-sqlite-datasource",
+          "uid": "kursova-sqlite"
+        },
+        "target": {
+          "refId": "Anno",
+          "datasource": {
+            "type": "frser-sqlite-datasource",
+            "uid": "kursova-sqlite"
+          },
+          "queryType": "table",
+          "rawQueryText": "SELECT start_ts AS time, end_ts AS timeend, label || ': ' || evidence AS text,\n       class AS tags\nFROM findings\nWHERE ',' || devices || ',' LIKE '%,$device,%' AND complexity = 'складні'",
+          "queryText": "SELECT start_ts AS time, end_ts AS timeend, label || ': ' || evidence AS text,\n       class AS tags\nFROM findings\nWHERE ',' || devices || ',' LIKE '%,$device,%' AND complexity = 'складні'",
+          "timeColumns": [
+            "time",
+            "timeend"
+          ]
+        }
+      }
+    ]
+  }
+}

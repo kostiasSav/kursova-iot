@@ -149,7 +149,7 @@ def check_structure(doc: dict) -> list[tuple[int, int, int]]:
 
 def check_against_data(doc: dict, data: Path, manifest: Path,
                        windows: list[tuple[int, int, int]]) -> None:
-    man = json.loads(manifest.read_text())
+    man = json.loads(manifest.read_text(encoding="utf-8"))
     tbl = pq.read_table(data, columns=["ts", "device_id"])
 
     ids = sorted(d["device_id"] for d in man["devices"])
@@ -203,7 +203,7 @@ def main() -> None:
     args = ap.parse_args()
 
     try:
-        doc = json.loads(Path(args.findings).read_text())
+        doc = json.loads(Path(args.findings).read_text(encoding="utf-8"))
     except Exception as exc:
         sys.exit(f"не вдалося прочитати {args.findings}: {exc}")
 
@@ -222,7 +222,7 @@ def main() -> None:
         print(f"  ПОМИЛКА: {e}")
 
     if errors:
-        print(f"\n{len(errors)} помилок — файл НЕ придатний до здачі.")
+        print(f"\nПомилок: {len(errors)} — файл НЕ придатний до здачі.")
         sys.exit(1)
     print("\nФайл придатний до перевірки."
           "\nЦе не означає, що знахідки правильні — лише що формат коректний.")

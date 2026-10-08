@@ -1,0 +1,33 @@
+# Готові дашборди з теки dashboards/: окрема тека в Grafana для кожного
+# сховища. Відкривайте лише теку свого сховища.
+# allowUiUpdates: зміни, збережені в Grafana, не блокуються (але щоб
+# зберегти їх у репозиторії, експортуйте JSON — див. початкову сторінку).
+apiVersion: 1
+
+providers:
+  - name: sqlite
+    folder: SQLite і DuckDB
+    folderUid: kursova-folder-sqlite
+    type: file
+    allowUiUpdates: true
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards/sqlite
+
+  - name: influxdb
+    folder: InfluxDB
+    folderUid: kursova-folder-influxdb
+    type: file
+    allowUiUpdates: true
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards/influxdb
+
+  - name: timescaledb
+    folder: TimescaleDB
+    folderUid: kursova-folder-timescaledb
+    type: file
+    allowUiUpdates: true
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards/timescaledb

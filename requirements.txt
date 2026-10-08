@@ -3,9 +3,13 @@ numpy>=2.0
 pandas>=2.2
 pyarrow>=17
 scipy>=1.14
+matplotlib>=3.8                # графіки детекторів (стадія 3) і реальних даних (стадія 4)
+psutil>=5.9                    # pipeline/measure.py: пам'ять процесу на всіх ОС
 
-# Стадія 1 — приймання MQTT
+# Стадія 1 — вузол на Python, власний брокер, приймання MQTT
 paho-mqtt>=2.1
+cbor2>=5.4                     # node/node.py: розмір того самого повідомлення у CBOR
+cryptography>=42               # broker/make_certs.py: сертифікати TLS
 
 # Сховища. Встановіть ТЕ, ЩО ПРИЗНАЧЕНЕ вам у маніфесті (assigned_stack).
 duckdb>=1.1
@@ -14,18 +18,18 @@ duckdb>=1.1
 #                                # SQLite вбудовано у Python, нічого не треба
 
 # Обробка. Так само — за призначенням.
-# polars>=1.0
+# polars>=1.25
 # dask[dataframe]>=2024.8
 
-# Детектори. Перший детектор пишете самі на numpy/scipy;
-# для другого встановіть бібліотеку свого призначеного методу.
+# Детектори. Базовому (detect/baseline.py) досить пакетів з першого блоку;
+# для призначеного методу встановіть його бібліотеку.
 # scikit-learn>=1.5              # Isolation Forest, Local Outlier Factor
 # statsmodels>=0.14              # STL + ESD
-# stumpy>=1.13                   # Matrix Profile
+# stumpy>=1.13                   # Matrix Profile; разом із ним встановиться numba
 #                                # EWMA control chart — лише numpy/pandas
 
 # Візуалізація — за призначенням.
-# streamlit>=1.38
-# dash>=2.18
+# streamlit>=1.40                # Streamlit; потребує ще й plotly
+# dash>=4.0                      # Plotly Dash; plotly встановиться разом із ним
 # plotly>=5.24
-#                                # Grafana встановлюється окремо, не через pip
+#                                # Grafana — через Docker: dashboard/grafana/docker-compose.yml

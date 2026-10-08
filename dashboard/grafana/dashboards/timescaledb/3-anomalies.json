@@ -1,0 +1,527 @@
+{
+  "uid": "timescaledb-anomalies",
+  "title": "3 · Аномалії · TimescaleDB",
+  "description": "Знахідки з findings.json",
+  "tags": [
+    "kursova",
+    "kursova-timescaledb"
+  ],
+  "timezone": "utc",
+  "editable": true,
+  "graphTooltip": 1,
+  "refresh": "",
+  "schemaVersion": 41,
+  "version": 1,
+  "time": {
+    "from": "2025-09-01T00:00:00.000Z",
+    "to": "2025-10-31T00:00:00.000Z"
+  },
+  "timepicker": {},
+  "fiscalYearStartMonth": 0,
+  "liveNow": false,
+  "links": [
+    {
+      "title": "Інші дашборди сховища",
+      "type": "dashboards",
+      "tags": [
+        "kursova-timescaledb"
+      ],
+      "asDropdown": false,
+      "keepTime": true,
+      "includeVars": false,
+      "targetBlank": false,
+      "icon": "external link"
+    },
+    {
+      "title": "Початкова сторінка",
+      "type": "link",
+      "url": "/",
+      "icon": "dashboard",
+      "keepTime": true,
+      "tooltip": "Як користуватися дашбордами"
+    }
+  ],
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Знахідки",
+      "description": "Оцінюються не більше 15 знахідок з найвищою впевненістю (п. 6.2 вказівок)",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 4
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "kursova-timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "kursova-timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": "table",
+          "rawSql": "SELECT count(*) AS \"Знахідок у файлі\", count(DISTINCT class) AS \"Різних класів\",\n       coalesce(sum(scored), 0) AS \"Буде оцінено (не більше 15)\"\nFROM findings"
+        }
+      ],
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "colorMode": "none",
+        "graphMode": "none",
+        "textMode": "value_and_name",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "wideLayout": true
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "decimals": 0,
+          "noValue": "—",
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "text"
+          }
+        },
+        "overrides": []
+      },
+      "transformations": [],
+      "id": 1
+    },
+    {
+      "type": "text",
+      "title": "",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 4
+      },
+      "options": {
+        "mode": "markdown",
+        "content": "Знахідки з **findings.json**, завантажені скриптом `dashboard/grafana/prepare.py`. Змінили файл — запустіть скрипт ще раз і оновіть сторінку. Клікніть пристрій у таблиці, щоб відкрити його графіки на час знахідки."
+      },
+      "id": 2
+    },
+    {
+      "type": "state-timeline",
+      "title": "Знахідки на шкалі часу",
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 24,
+        "h": 12
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "kursova-timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "kursova-timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": "table",
+          "rawSql": "-- Кожна знахідка — окремий рядок: на початку значення = номер класу,\n-- у момент завершення = 0 (там смуга обривається).\nSELECT start_ts AS time, label, class_code AS \"клас\" FROM findings\nUNION ALL\nSELECT end_ts AS time, label, 0 AS \"клас\" FROM findings\nORDER BY time"
+        }
+      ],
+      "transformations": [
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "label"
+            ],
+            "keepFields": false,
+            "naming": {
+              "asLabels": true
+            }
+          }
+        }
+      ],
+      "description": "Рядок — одна знахідка з findings.json, колір — складність класу: синій — прості, помаранчевий — середні, зелений — складні.",
+      "options": {
+        "showValue": "never",
+        "mergeValues": true,
+        "rowHeight": 0.7,
+        "alignValue": "left",
+        "legend": {
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "displayName": "${__field.labels.label}",
+          "mappings": [
+            {
+              "type": "value",
+              "options": {
+                "0": {
+                  "text": " ",
+                  "color": "transparent",
+                  "index": 0
+                },
+                "1": {
+                  "text": "stuck_at",
+                  "color": "#2a78d6",
+                  "index": 1
+                },
+                "2": {
+                  "text": "outage",
+                  "color": "#2a78d6",
+                  "index": 2
+                },
+                "3": {
+                  "text": "spike_storm",
+                  "color": "#2a78d6",
+                  "index": 3
+                },
+                "4": {
+                  "text": "rogue_device",
+                  "color": "#2a78d6",
+                  "index": 4
+                },
+                "5": {
+                  "text": "drift",
+                  "color": "#eb6834",
+                  "index": 5
+                },
+                "6": {
+                  "text": "clock_skew",
+                  "color": "#eb6834",
+                  "index": 6
+                },
+                "7": {
+                  "text": "beaconing",
+                  "color": "#eb6834",
+                  "index": 7
+                },
+                "8": {
+                  "text": "energy_anomaly",
+                  "color": "#eb6834",
+                  "index": 8
+                },
+                "9": {
+                  "text": "zone_incoherence",
+                  "color": "#1baf7a",
+                  "index": 9
+                },
+                "10": {
+                  "text": "gateway_group_loss",
+                  "color": "#1baf7a",
+                  "index": 10
+                },
+                "11": {
+                  "text": "exfil_pattern",
+                  "color": "#1baf7a",
+                  "index": 11
+                },
+                "12": {
+                  "text": "sensor_swap",
+                  "color": "#1baf7a",
+                  "index": 12
+                },
+                "99": {
+                  "text": "невідомий клас",
+                  "color": "#898781",
+                  "index": 13
+                }
+              }
+            }
+          ],
+          "color": {
+            "mode": "fixed",
+            "fixedColor": "transparent"
+          },
+          "custom": {
+            "lineWidth": 0,
+            "fillOpacity": 85
+          }
+        },
+        "overrides": []
+      },
+      "id": 3
+    },
+    {
+      "type": "table",
+      "title": "Перелік знахідок",
+      "description": "",
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "kursova-timescaledb"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "kursova-timescaledb"
+          },
+          "editorMode": "code",
+          "rawQuery": true,
+          "format": "table",
+          "rawSql": "SELECT no AS \"№\", class AS \"Клас\", complexity AS \"Складність\",\n       replace(devices, ',', ', ') AS \"Пристрої\", start_ts AS \"Початок\", end_ts AS \"Кінець\",\n       hours AS \"Тривалість, год\", confidence AS \"Впевненість\",\n       CASE scored WHEN 1 THEN 'так' ELSE 'ні' END AS \"Буде оцінено\",\n       evidence AS \"Обґрунтування\", first_device, zoom_from_ms, zoom_to_ms\nFROM findings ORDER BY start_ts"
+        }
+      ],
+      "options": {
+        "showHeader": true,
+        "cellHeight": "sm",
+        "footer": {
+          "show": false,
+          "reducer": [
+            "sum"
+          ],
+          "fields": ""
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "auto"
+            },
+            "inspect": true
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Початок"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:DD.MM.YYYY HH:mm"
+              },
+              {
+                "id": "custom.width",
+                "value": 135
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Кінець"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "time:DD.MM.YYYY HH:mm"
+              },
+              {
+                "id": "custom.width",
+                "value": 135
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "first_device"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "zoom_from_ms"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "zoom_to_ms"
+            },
+            "properties": [
+              {
+                "id": "custom.hidden",
+                "value": true
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Пристрої"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Відкрити графіки першого пристрою на час знахідки",
+                    "url": "/d/timescaledb-device/?var-device=${__data.fields.first_device}&from=${__data.fields.zoom_from_ms}&to=${__data.fields.zoom_to_ms}"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Обґрунтування"
+            },
+            "properties": [
+              {
+                "id": "custom.minWidth",
+                "value": 480
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "№"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 45
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Клас"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Складність"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 95
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Пристрої"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 180
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Тривалість, год"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 1
+              },
+              {
+                "id": "custom.width",
+                "value": 115
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Впевненість"
+            },
+            "properties": [
+              {
+                "id": "decimals",
+                "value": 2
+              },
+              {
+                "id": "custom.width",
+                "value": 105
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Буде оцінено"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 110
+              }
+            ]
+          }
+        ]
+      },
+      "transformations": [],
+      "id": 4
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  }
+}
