@@ -1,0 +1,115 @@
+# ===========================================================================
+#  Сервери для варіантів зі сховищами InfluxDB та TimescaleDB.
+#
+#  Запуск (одна команда, з цієї теки):
+#
+#      docker compose up -d
+#      docker compose ps          # має бути "healthy" у обох
+#
+#  Зупинка:              docker compose stop
+#  Зупинка + очищення:   docker compose down -v      # -v СТИРАЄ всі дані
+#  Журнали:              docker compose logs -f influxdb
+#
+#  Доступи (навмисно прості — це локальна навчальна лабораторія,
+#  ці паролі НЕ МОЖНА використовувати ніде поза цією машиною):
+#
+#    InfluxDB 2.7   http://localhost:8086     UI у браузері
+#                   організація  kursova
+#                   bucket       iot
+#                   логін/пароль student / kursova2025
+#                   токен        kursova-dev-token
+#
+#    TimescaleDB    localhost:5432            PostgreSQL 16 + TimescaleDB
+#                   база         iot
+#                   логін/пароль student / kursova2025
+#
+#  Ці ж значення є типовими у storage.py, тому після `docker compose up -d`
+#  достатньо викликати open_storage("influxdb") без жодних аргументів.
+#
+#  Якщо порт зайнятий ("port is already allocated") — у вас уже працює
+#  локальний PostgreSQL або InfluxDB. Або зупиніть його, або змініть ліве
+#  число у рядку ports (наприклад "127.0.0.1:5433:5432") і передайте новий
+#  порт у open_storage("timescaledb", port=5433).
+# ===========================================================================
+
+# Pinned project name. Without it Compose names the project after whichever
+# directory it was invoked from, so running `docker compose up` here and
+# `docker compose -f pipeline/docker-compose.yml up` from student/ would build
+# two separate sets of volumes — and the dataset loaded through one would be
+# invisible from the other.
+name: kursova
+
+services:
+
+  # -------------------------------------------------------------------------
+  # InfluxDB 2.7 — time-series database with its own query language (Flux).
+  # -------------------------------------------------------------------------
+  influxdb:
+    image: influxdb:2.7
+    container_name: kursova-influxdb
+    restart: unless-stopped
+    ports:
+      # Bound to the loopback address on purpose: the credentials below are
+      # fixed and public, so the service must not be reachable from the LAN.
+      - "127.0.0.1:8086:8086"
+    environment:
+      # DOCKER_INFLUXDB_INIT_MODE=setup runs the first-boot wizard
+      # unattended, so the student never sees the browser setup screen.
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: student
+      DOCKER_INFLUXDB_INIT_PASSWORD: kursova2025
+      DOCKER_INFLUXDB_INIT_ORG: kursova
+      DOCKER_INFLUXDB_INIT_BUCKET: iot
+      # 0 = keep forever. Any finite retention would silently expire the
+      # variant data, which is dated months in the past.
+      DOCKER_INFLUXDB_INIT_RETENTION: 0s
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: kursova-dev-token
+      # A variant is ~5-7 million points; the default cache is sized for a
+      # trickle of live telemetry, not a bulk import.
+      INFLUXD_STORAGE_CACHE_MAX_MEMORY_SIZE: "2147483648"
+      INFLUXD_STORAGE_CACHE_SNAPSHOT_MEMORY_SIZE: "268435456"
+    volumes:
+      - influxdb-data:/var/lib/influxdb2
+      - influxdb-config:/etc/influxdb2
+    healthcheck:
+      test: ["CMD", "influx", "ping"]
+      interval: 10s
+      timeout: 5s
+      # The first boot has to run the setup wizard before it answers pings.
+      retries: 12
+      start_period: 30s
+
+  # -------------------------------------------------------------------------
+  # TimescaleDB — PostgreSQL 16 with the hypertable extension preloaded.
+  # -------------------------------------------------------------------------
+  timescaledb:
+    image: timescale/timescaledb:latest-pg16
+    container_name: kursova-timescaledb
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:5432:5432"
+    environment:
+      POSTGRES_USER: student
+      POSTGRES_PASSWORD: kursova2025
+      POSTGRES_DB: iot
+      # timescaledb-tune runs on first boot and writes postgresql.conf from
+      # these numbers. Telling it what it may use beats letting it guess from
+      # the host, because a container sees all of the host's RAM.
+      TS_TUNE_MEMORY: 2GB
+      TS_TUNE_NUM_CPUS: 2
+      TIMESCALEDB_TELEMETRY: "off"
+    volumes:
+      - timescaledb-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U student -d iot"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+# Named volumes, so `docker compose down` (without -v) keeps a loaded dataset
+# and the student does not have to repeat a multi-minute import after a reboot.
+volumes:
+  influxdb-data:
+  influxdb-config:
+  timescaledb-data:
