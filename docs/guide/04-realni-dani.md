@@ -282,7 +282,7 @@ python realdata/clean.py --detector matrix_profile --method-args "--window 6h"
 
 **Увага.** Деякі методи працюють довго, бо проходять 54 вузли вісім разів:
 вбудований, базовий і EWMA — до пів хвилини, Matrix Profile — близько
-хвилини, LOF — 2–3 хвилини, Isolation Forest — близько 3, STL+ESD — 5–6
+хвилини, LOF — 2–3 хвилини, Isolation Forest — близько 3, STL+ESD — 5–15
 хвилин. Запускайте і займіться чимось іншим.
 
 ### Два типи детекторів
