@@ -50,12 +50,12 @@ def daily_profile(x: pd.Series, ref: pd.Series, mode: str) -> pd.Series:
     """Типове значення для кожного часу доби — медіана за еталонні дні."""
     if mode == "none":
         return pd.Series(ref.median(), index=x.index)
-    weekend = ref.index.dayofweek >= 5
+    weekend = ref.index.day_of_week >= 5
     split = mode == "workdays" and weekend.any() and not weekend.all()
 
     def key(idx: pd.DatetimeIndex):
         minute = idx.hour * 60 + idx.minute                 # хвилина доби
-        return minute + 10000 * (idx.dayofweek >= 5) if split else minute
+        return minute + 10000 * (idx.day_of_week >= 5) if split else minute
 
     typical = ref.groupby(key(ref.index)).median()
     return pd.Series(typical.reindex(key(x.index)).to_numpy(), index=x.index)
