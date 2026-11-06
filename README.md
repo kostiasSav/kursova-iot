@@ -224,7 +224,7 @@ python selfcheck.py --findings findings.json --data variant_047.parquet --manife
 запустити ваш конвеєр при комісії:
 
 ```bash
-python run_all.py --data variant_1NN.parquet --manifest variant_1NN.json --storage <ваше сховище>
+python run_all.py --data variant_XXX.parquet --manifest variant_XXX.json --storage <ваше сховище>
 ```
 
 `--storage` — сховище з **вашого** маніфесту: у маніфесті незнайомого
