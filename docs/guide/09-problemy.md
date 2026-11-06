@@ -37,6 +37,12 @@ Microsoft Store…» / «'python' is not recognized…» (Windows).** Python н�
 Python немає готової збірки бібліотеки. Найпростіше — встановити Python
 версії, рекомендованої в кроці 0.2, і створити віртуальне середовище заново.
 
+**`pip install "dask[dataframe]>=2024.8"` на Windows з Python 3.15 зупиняється
+на `pyyaml` (`Failed building wheel for pyyaml` або довгий червоний текст).**
+Для Python 3.15 на Windows ще немає готової збірки PyYAML, яку потребує Dask.
+Встановіть Python 3.14 (крок 0.2), створіть віртуальне середовище заново і
+повторіть.
+
 ---
 
 ## Файли і папки
@@ -272,7 +278,7 @@ allocated`.** Порт 5432 (TimescaleDB) чи 8086 (InfluxDB) уже зайня
 `matplotlib`).
 
 **`pip install stumpy` завершується помилкою про `llvmlite` (Mac з
-процесором Intel).** Для Python 3.14 на Mac з Intel немає готової збірки.
+процесором Intel).** Для Python 3.14 і 3.15 на Mac з Intel немає готової збірки.
 Встановіть Python 3.13 (крок 0.2), створіть віртуальне середовище заново і
 повторіть.
 
