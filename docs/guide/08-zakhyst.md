@@ -93,6 +93,24 @@ def find_incidents(storage, manifest):
 сусідами), і перевірте на навчальному наборі, що вона знаходить відомі
 інциденти з `tuning_truth.json`.
 
+**Порада (InfluxDB і TimescaleDB).** Кожен виклик `storage.series()` — це
+запит до бази в Docker: на InfluxDB близько пів секунди. Якщо ваш `hunt.py`
+бере той самий ряд для кількох перевірок, читайте кожен ряд лише раз і
+зберігайте у словнику:
+
+```python
+cache = {}
+
+def series(storage, device, metric):
+    if (device, metric) not in cache:
+        cache[(device, metric)] = storage.series(device, metric)
+    return cache[(device, metric)]
+```
+
+і далі пишіть `series(storage, "temp-03-lob", "temperature")` замість
+`storage.series(...)`. На перевірці посібника це скоротило пошук на InfluxDB з
+9 хвилин до менш ніж двох.
+
 ### Перевірка на навчальному наборі
 
 У `tuning.json` призначено InfluxDB, тому для репетиції вкажіть **своє**
