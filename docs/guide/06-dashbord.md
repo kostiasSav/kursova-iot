@@ -226,7 +226,7 @@ docker compose -f dashboard/grafana/docker-compose.yml stop
 
 Щоб змінювати дашборди, натисніть **Sign in** угорі праворуч (`admin` /
 `kursova2025`), далі **Edit** і **Save dashboard**. Щоб перенести зміни у
-свій репозиторій: **Export → Export as JSON → Save to file** і замініть файл
+файли проєкту: **Export → Export as JSON → Save to file** і замініть файл
 у `dashboard/grafana/dashboards/<ваше сховище>/`.
 
 ### Якщо панель червона або порожня

@@ -15,6 +15,10 @@ mote_locs.txt
 *.sqlite
 *.db
 .venv/
+
+# Файли для здачі (make_submission.py) — у Google Classroom, не в репозиторій
+*.zip
+*_findings.json
 __pycache__/
 *.pyc
 .DS_Store
