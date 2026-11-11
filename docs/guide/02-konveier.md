@@ -22,6 +22,10 @@
 | `processing` | Polars | `pip install "polars>=1.25"` |
 | `processing` | Dask | `pip install "dask[dataframe]>=2024.8"` |
 
+На Windows з ARM-процесором (Snapdragon) Polars потребує ще одного
+налаштування — див. [Типові проблеми](09-problemy.md), розділ «Python і
+бібліотеки».
+
 Якщо ваше сховище — DuckDB чи SQLite, а дашборд — не Grafana, розділ 2.2
 можна пропустити.
 
